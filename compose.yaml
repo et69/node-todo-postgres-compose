@@ -1,0 +1,30 @@
+name: todo-app
+services:
+  node:
+    build: ./app
+    image: node-api
+    pull_policy: build
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - 3000:3000
+    networks:
+      - app-net
+
+  postgres:
+    image: postgres:13-alpine
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -q -U postgres"]
+    env_file:
+      - ./postgres.env
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres-data:/var/lib/postgresql/
+    networks:
+      - app-net
+
+volumes:
+  postgres-data:
+networks:
+  app-net:
